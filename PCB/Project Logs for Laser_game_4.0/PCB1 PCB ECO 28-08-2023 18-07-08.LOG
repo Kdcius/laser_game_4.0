@@ -1,0 +1,2 @@
+Added Pin To Net: NetName=usbVBUS Pin=R4-1
+Change Net Name : Old Net Name=usbVBUS New Net Name=VBUS

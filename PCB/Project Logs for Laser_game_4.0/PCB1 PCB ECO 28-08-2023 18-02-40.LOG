@@ -1,0 +1,4 @@
+Added Pin To Net: NetName=GND Pin=SW1-2
+Added Pin To Net: NetName=EN Pin=SW1-3
+Added Pin To Net: NetName=GND Pin=SW2-2
+Added Pin To Net: NetName=GPIO0 Pin=SW2-3

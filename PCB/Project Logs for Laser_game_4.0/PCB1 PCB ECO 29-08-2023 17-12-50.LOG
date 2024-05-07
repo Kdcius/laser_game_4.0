@@ -1,0 +1,9 @@
+Change Component Comment : Designator=S1 Old Comment=GPTS203211B New Comment=1101M2S3CQE2
+Change component parameters: Designator = "S1" ("S1"); Footprint = "GPTS203211B"; UniqueID = "\MJKZOHME" ("\MJKZOHME")
+Change component parameters (AddParameter): Name = "Arrow Part Number"; Value = "1101M2S3CQE2"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Arrow Price/Stock"; Value = "https://www.arrow.com/en/products/1101m2s3cqe2/ck?region=europe"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Datasheet Link"; Value = "https://www.ckswitches.com/media/1429/1000.pdf"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Manufacturer_Name"; Value = "C & K COMPONENTS"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Manufacturer_Part_Number"; Value = "1101M2S3CQE2"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Mouser Part Number"; Value = "611-1101M2S3CQE2"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Mouser Price/Stock"; Value = "https://www.mouser.co.uk/ProductDetail/CK/1101M2S3CQE2?qs=C4UUOezh8MStnZqkTHGAfQ%3D%3D"; VariantName = "[No Variations]"

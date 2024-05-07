@@ -1,0 +1,10 @@
+Added Component: Designator=S1(GPTS203211B)
+Add component (AddParameter): Name = "Arrow Part Number"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Arrow Price/Stock"; Value = ""; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Datasheet Link"; Value = "http://switches-connectors-custom.cwind.com/Asset/GPTS203211BR2.pdf"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Manufacturer_Name"; Value = "CW Industries"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Manufacturer_Part_Number"; Value = "GPTS203211B"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Mouser Part Number"; Value = "629-GPTS203211B"; VariantName = "[No Variations]"
+Add component (AddParameter): Name = "Mouser Price/Stock"; Value = "https://www.mouser.co.uk/ProductDetail/CW-Industries/GPTS203211B?qs=sajaCoHCXPR%252BmLwibobs6Q%3D%3D"; VariantName = "[No Variations]"
+Added Pin To Net: NetName=3V7 Pin=S1-1
+Added Pin To Net: NetName=NetP4_1 Pin=S1-2
