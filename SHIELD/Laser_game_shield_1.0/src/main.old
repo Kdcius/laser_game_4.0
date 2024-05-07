@@ -1,0 +1,277 @@
+//This piece of code is embedded in an ESP32, it will act as a laser tag receiver shield attached to the chest of the player.
+//First the pistol (ESP32) will send its playerID and mac address to the shield via IR signal. The shield will then connect to the pistol using esp-now.
+//When linked, the receiver will send every IR signal received to the pistol via esp-now.
+
+#include <Arduino.h>
+#include <IRremoteESP8266.h>
+#include <IRrecv.h>
+#include <IRutils.h>
+#include <WiFi.h>
+#include <esp_now.h>
+
+// IRrecv irrecv(35);  // Create an IR receiver object
+
+// int shieldID = -1;  // The ID of the shield, it will be set by the pistol
+// int playerID = -1;
+// uint8_t macAddressBytes[6];
+// uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+// int receivedByteCount = 0;
+// bool receptionComplete = false;
+// bool linked = false;
+
+// decode_results results;
+// // This task is responsible for receiving IR signals from the IR receiver (NEC protocol)
+// uint32_t irReceive(){
+//   if (irrecv.decode(&results)) {  // If a signal is received
+//     // Decode the player ID and shot type from the received code
+//     uint32_t receivedValue = results.value;
+//     irrecv.resume();  // Receive the next value
+//     return receivedValue;
+//   }
+//   return 0;
+// }
+
+
+// void setup() {
+//   Serial.begin(115200);
+//   irrecv.enableIRIn();  // Start the receiver
+//   // Initialize ESP-NOW
+//   WiFi.mode(WIFI_STA);
+//   if (esp_now_init() != ESP_OK) {
+//     Serial.println("Error initializing ESP-NOW");
+//     return;
+//   }
+//   // Register the callback function for sending data
+//   esp_now_register_send_cb([](const uint8_t *mac, esp_now_send_status_t status) {
+//     Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Send callback success" : "Send callback failure");
+//   });
+//   Serial.println("Setup complete");
+// }
+
+
+// void loop() {
+//   // Listen for IR signals
+//   if (irrecv.decode(&results)) {
+//     // If a signal is received, process the data
+//     uint32_t receivedData = results.value;
+    
+//     // Assuming the first frame will be the playerID
+//     if (playerID == -1 || playerID>100 || playerID<0) {
+//       playerID = receivedData;
+//       Serial.println("Received PlayerID: " + String(playerID));
+//     }
+//     // The following frames should be the MAC address bytes
+//     else if (!linked) {
+//       if (receivedByteCount < 6) {
+//         // Serial.println("Brut MAC byte: " + String(receivedData, HEX));
+//         //We want to extract the 8 bits of the 32 bits receivedData, the 8 bits are the 8 MSB
+//         receivedData = receivedData >> 24;
+//         // Serial.println("Shifted MAC byte: " + String(receivedData, HEX));
+//         macAddressBytes[receivedByteCount] = receivedData;  // Store each byte
+//         // Serial.println("Received MAC byte: " + String(macAddressBytes[receivedByteCount], HEX));
+//         receivedByteCount++;
+//       }
+      
+//       // If all 6 bytes are received, the MAC address is complete
+//       if (receivedByteCount == 6) {
+//         String macAddress = "";
+//         for (int i = 0; i < 6; i++) {
+//           if (i > 0) macAddress += ":";
+//           macAddress += String(macAddressBytes[i], HEX);
+//         }
+//         Serial.println("Complete MAC address received: " + macAddress);
+//         receptionComplete = true;
+        
+//         // You could reset the variables here if needed for the next sequence
+//         // playerID = -1;
+//         // receivedByteCount = 0;
+//       }
+//     }
+
+//     if (receptionComplete && !linked) {
+//       // Create a struct for the pistol
+//       esp_now_peer_info_t pistol_peer;
+//       // Copy the mac address of the pistol to the struct
+//       // memcpy(pistol.peer_addr, macAddressBytes, 6);
+//       for(int i = 0; i < 6; i++) {
+//         pistol_peer.peer_addr[i] = macAddressBytes[i];
+//       }
+//       // Set the channel to 0
+//       pistol_peer.channel = 0;
+//       // Set the encryption to false
+//       pistol_peer.encrypt = false;
+//       // Add the pistol to the peer list
+//       esp_err_t addStatus = esp_now_add_peer(&pistol_peer);
+//       if (addStatus == ESP_OK) {
+//         Serial.println("Pistol add: Success");
+//       }
+//       else if (addStatus == ESP_ERR_ESPNOW_NOT_INIT) {
+//         // How did we get so far!!
+//         Serial.println("Pistol add: ESPNOW not Init.");
+//       }
+//       else if (addStatus == ESP_ERR_ESPNOW_ARG) {
+//         Serial.println("Pistol add: Invalid Argument");
+//       }
+//       else if (addStatus == ESP_ERR_ESPNOW_FULL) {
+//         Serial.println("Pistol add: Peer list full");
+//       }
+//       else if (addStatus == ESP_ERR_ESPNOW_NO_MEM) {
+//         Serial.println("Pistol add: Out of memory");
+//       }
+//       else if (addStatus == ESP_ERR_ESPNOW_EXIST) {
+//         Serial.println("Pistol add: Peer Exists");
+//       }
+//       else {
+//         Serial.println("Pistol add: Not sure what happened");
+//       }
+//       // Set the shieldID to the playerID of the pistol
+//       shieldID = playerID;
+
+//       //Add broadcast address to peer list
+//       esp_now_peer_info_t broadcast;
+//       memcpy(broadcast.peer_addr, broadcastAddress, 6);
+//       broadcast.channel = 0;
+//       broadcast.encrypt = false;
+//       esp_now_add_peer(&broadcast);
+
+//       //Debug broadcast datas
+//       uint8_t broadcastMsg=222;
+
+//       //Broadcast the pistol MAC address to all the pistols so the pistol can link to the shield
+//       Serial.println("Broadcasting pistol MAC address");
+//       esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &broadcastMsg, sizeof(broadcastMsg));
+//       if (result == ESP_OK) {
+//         Serial.println("Broadcasting: Success");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_NOT_INIT) {
+//         // How did we get so far!!
+//         Serial.println("Broadcasting: ESPNOW not Init.");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_ARG) {
+//         Serial.println("Broadcasting: Invalid Argument");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_INTERNAL) {
+//         Serial.println("Broadcasting: Internal Error");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_NO_MEM) {
+//         Serial.println("Broadcasting: ESP_ERR_ESPNOW_NO_MEM");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_NOT_FOUND) {
+//         Serial.println("Broadcasting: Peer not found.");
+//       }
+//       else {
+//         Serial.println("Broadcasting: Not sure what happened");
+//       }
+
+//       linked = true;
+//     }
+
+//     // Now if the shield is linked to a pistol, it will send every IR signal received to the pistol
+//     if (linked) {
+//       Serial.println("Sending IR signal to pistol");
+//       esp_err_t result = esp_now_send(macAddressBytes, (uint8_t *) &receivedData, sizeof(receivedData));
+//       if (result == ESP_OK) {
+//         Serial.println("Sending IR: Success");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_NOT_INIT) {
+//         // How did we get so far!!
+//         Serial.println("Sending IR: ESPNOW not Init.");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_ARG) {
+//         Serial.println("Sending IR: Invalid Argument");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_INTERNAL) {
+//         Serial.println("Sending IR: Internal Error");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_NO_MEM) {
+//         Serial.println("Sending IR: ESP_ERR_ESPNOW_NO_MEM");
+//       }
+//       else if (result == ESP_ERR_ESPNOW_NOT_FOUND) {
+//         Serial.println("Sending IR: Peer not found.");
+//       }
+//       else {
+//         Serial.println(result);
+//         Serial.println("Sending IR: Not sure what happened");
+//       }
+//     }
+
+//     irrecv.resume();  // Resume receiving
+//   }
+// }
+
+
+
+
+
+// 48:27:E2:83:CD:1C
+uint8_t broadcastAddress[] = {0x48, 0x27, 0xE2, 0x83, 0xCD, 0x1C};
+uint8_t broadcastMsg=222;
+esp_now_peer_info_t broadcast;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("ESPNow/Basic/Master Example");
+  WiFi.mode(WIFI_STA);
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+  Serial.println(WiFi.macAddress());
+  esp_now_register_send_cb([](const uint8_t *mac, esp_now_send_status_t status) {
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Send callback success" : "Send callback failure");
+  });
+  Serial.println("Setup complete");
+  memcpy(broadcast.peer_addr, broadcastAddress, 6);
+  broadcast.channel = 0;
+  broadcast.encrypt = false;
+  esp_err_t addResult = esp_now_add_peer(&broadcast);
+  if (addResult == ESP_OK) {
+    Serial.println("Broadcast add: Success");
+  }
+  else if (addResult == ESP_ERR_ESPNOW_NOT_INIT) {
+    // How did we get so far!!
+    Serial.println("Broadcast add: ESPNOW not Init.");
+  }
+  else if (addResult == ESP_ERR_ESPNOW_ARG) {
+    Serial.println("Broadcast add: Invalid Argument");
+  }
+  else if (addResult == ESP_ERR_ESPNOW_FULL) {
+    Serial.println("Broadcast add: Peer list full");
+  }
+  else if (addResult == ESP_ERR_ESPNOW_NO_MEM) {
+    Serial.println("Broadcast add: Out of memory");
+  }
+  else if (addResult == ESP_ERR_ESPNOW_EXIST) {
+    Serial.println("Broadcast add: Peer Exists");
+  }
+  else {
+    Serial.println("Broadcast add: Not sure what happened");
+  }
+}
+
+void loop(){
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &broadcastMsg, sizeof(broadcastMsg));
+  if (result == ESP_OK) {
+    Serial.println("Broadcasting: Success");
+  }
+  else if (result == ESP_ERR_ESPNOW_NOT_INIT) {
+    // How did we get so far!!
+    Serial.println("Broadcasting: ESPNOW not Init.");
+  }
+  else if (result == ESP_ERR_ESPNOW_ARG) {
+    Serial.println("Broadcasting: Invalid Argument");
+  }
+  else if (result == ESP_ERR_ESPNOW_INTERNAL) {
+    Serial.println("Broadcasting: Internal Error");
+  }
+  else if (result == ESP_ERR_ESPNOW_NO_MEM) {
+    Serial.println("Broadcasting: ESP_ERR_ESPNOW_NO_MEM");
+  }
+  else if (result == ESP_ERR_ESPNOW_NOT_FOUND) {
+    Serial.println("Broadcasting: Peer not found.");
+  }
+  else {
+    Serial.println("Broadcasting: Not sure what happened");
+  }
+  delay(1000);
+}
